@@ -106,18 +106,38 @@ RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
   GPIOA->AFR[0] = (GPIOA->AFR[0] & ~GPIO_AFRL_AFRL5) | (0b0001 << GPIO_AFRL_AFRL5_Pos);
 }
 
+void setupLeds(){
+  //pa13
+    GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER7) | (0b01 << GPIO_MODER_MODER7_Pos);       // set pin PA11 to output.
+  GPIOA->OTYPER &= ~GPIO_OTYPER_OT_7;  
+}
+
+void setupControls(){
+  GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER0) | (0b00 << GPIO_MODER_MODER0_Pos);       // set pin PA0 to input.
+  GPIOA->PUPDR = (GPIOA->PUPDR & ~GPIO_PUPDR_PUPDR0) | (0b01 << GPIO_PUPDR_PUPDR0_Pos);       //pullup
+
+  //interrupt
+    SYSCFG->EXTICR[1] = (SYSCFG->EXTICR[1] & ~SYSCFG_EXTICR1_EXTI0) | (0b0000 << SYSCFG_EXTICR1_EXTI0_Pos);
+  EXTI->FTSR |= EXTI_FTSR_TR0;   // Set interrupt EXTI* trigger to falling edge
+  EXTI->IMR = EXTI_IMR_MR0;     // Unmask EXTI* line
+  NVIC_EnableIRQ(EXTI0_IRQn);     
+}
+//input pa0
+extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
+{
+    EXTI->PR |= EXTI_PR_PR0;  
+    //led pa5
+    GPIOA->ODR ^= GPIO_ODR_7; 
+}
+
+
+
 /**
   * @brief  The application entry point.
   * @retval int
   */
-  unsigned long longInterval = 500;
-  unsigned long shortInterval = 20;
-  unsigned long timeNow = 0;
-  bool beingPressed = false;
-  bool hasRisen = false;
   static char msgBuf[80];
-  //0 = unselected
-  int lastPressedBtn = 0;
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -189,14 +209,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   setupServos();
+  setupLeds();
+  setupControls();
   while (1)
   {
-    // TIM3->CCR1 = 128; 
-    // HAL_Delay(1000);
-    // TIM3->CCR1 = 150; 
-    // HAL_Delay(1000);
-    // TIM3->CCR1 = 172; 
-    // HAL_Delay(1000);
+
   }
 }
 
