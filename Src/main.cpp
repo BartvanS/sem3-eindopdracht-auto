@@ -79,13 +79,13 @@ void StartDefaultTask(void *argument);
 void setupServos(){
   //servo pin a0
   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-  TIM3->PSC = 719; // 100.000 clockspeed -> 1 step per 10 micro seconden
+  TIM3->PSC = 71; // 100.000 clockspeed -> 1 step per 10 micro seconden
   TIM3->CCMR1 = TIM3->CCMR1 & ~TIM_CCMR1_CC1S;
   TIM3->CCMR1 = (TIM3->CCMR1 & ~TIM_CCMR1_OC1M) | (0b0110<<TIM_CCMR1_OC1M_Pos);
-  TIM3->ARR = 2000; // 2000 ipv 20.000 want we hebben stappen van 10 micro seconden.
+  TIM3->ARR = 20000; // 2000 ipv 20.000 want we hebben stappen van 10 micro seconden.
   // TIM3->CCR1 = 128; //128 x 10 = 1280 micro seconden -> snelst met de klok mee
   // TIM3->CCR1 = 172; // 172 x 10 = 1720 micro seconden -> snelst tegen de klok in
-  TIM3->CCR1 = 128; // 150 x 10 = 1500 micro seconden -> stop
+  TIM3->CCR1 = 1500; // 150 x 10 = 1500 micro seconden -> stop
   TIM3->CCER = TIM3->CCER | TIM_CCER_CC1E;
   TIM3->CR1 |= TIM3->CR1 | TIM_CR1_CEN;
   GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER6) | (0b10 << GPIO_MODER_MODER6_Pos);
@@ -93,12 +93,13 @@ void setupServos(){
 
 
 
-RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-  TIM2->PSC = 719;
+  RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+  TIM2->PSC = 71;
   TIM2->CCMR1 = TIM2->CCMR1 & ~TIM_CCMR1_CC1S;
   TIM2->CCMR1 = (TIM2->CCMR1 & ~TIM_CCMR1_OC1M) | (0b0110<<TIM_CCMR1_OC1M_Pos);
-  TIM2->ARR = 2000;
-  TIM2->CCR1 = 172;
+  TIM2->ARR = 20000;
+  // TIM2->CCR1 = 172;
+  TIM2->CCR1 = 1500;
   TIM2->CCER = TIM2->CCER | TIM_CCER_CC1E;
 
   TIM2->CR1 |= TIM2->CR1 | TIM_CR1_CEN;
@@ -122,47 +123,43 @@ void setupControls(){
   EXTI->IMR = EXTI_IMR_MR0;     // Unmask EXTI* line
   NVIC_EnableIRQ(EXTI0_IRQn);     
 }
-//input pa0
+
+void startSystem(){
+    //led pa5
+    GPIOA->ODR |= GPIO_ODR_7; 
+  TIM2->CCR1 = 1720;
+  TIM3->CCR1 = 1280; 
+}
+void stopSystem(){
+  TIM2->CCR1 = 1500;
+  TIM3->CCR1 = 1500; 
+  GPIOA->ODR &= ~GPIO_ODR_7;
+}
+//input pa0 button
+  static char msgBuf[80];
+  bool isOn = false;
 extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
-    EXTI->PR |= EXTI_PR_PR0;  
-    //led pa5
-    GPIOA->ODR ^= GPIO_ODR_7; 
+  EXTI->PR |= EXTI_PR_PR0;  
+  if (!isOn)
+  {
+    startSystem();
+  }else{
+    stopSystem();
+  }
+  isOn = !isOn;
 }
-
-
-
 /**
   * @brief  The application entry point.
   * @retval int
   */
-  static char msgBuf[80];
 
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-  // ****************************** IMPORTANT NOTE ******************************
-  // When using FreeRTOS it is very important to make all variables in main() static so they will be on the heap and not on the stack.
-  // Otherwise these variables might be overwritten during an ISR and possibly the HardFault_Handler() will be called.
-  // This because after osKernelStart(), main will not be entered anymore and the main stack is reused as the ISR stack.
-  // See https://www.freertos.org/FreeRTOS_Support_Forum_Archive/January_2015/freertos_Main_stack_pointer_reset_when_starting_the_scheduler_e5a776c1j.html
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -170,43 +167,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   sprintf(msgBuf, "%s", "Hello World!\r\n");
   HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-  /* USER CODE END 2 */
-
-  /* Init scheduler */
-  //osKernelInitialize();   // Uncomment if FreeRTOS will be used
-
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  // Uncomment the line below if is FreeRTOS is used.
-  // defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* Start scheduler */
-  // Uncomment the line below if is FreeRTOS is used.
-  // osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
 
   setupServos();
   setupLeds();
