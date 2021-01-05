@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define FULLSPEEDF 1720
+#define FULLSPEEDB 1280
+#define STOPMOTOR 1500
 
 UART_HandleTypeDef huart2;
 
@@ -75,20 +78,34 @@ void setupControls(){
   NVIC_EnableIRQ(EXTI0_IRQn);     
 }
 
+void setupEncoder(){
+  //INTERRUPT pin encoder HOR (PB4)
+  GPIOB->MODER = (GPIOB->MODER & ~GPIO_MODER_MODER4) | (0b00 << GPIO_MODER_MODER4_Pos); // set pin PA0 to input.
+  GPIOB->PUPDR = (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR4) | (0b00 << GPIO_PUPDR_PUPDR4_Pos);
+  SYSCFG->EXTICR[0] = (SYSCFG->EXTICR[0] & ~SYSCFG_EXTICR1_EXTI2) | (0b0000 << SYSCFG_EXTICR1_EXTI2_Pos);
+  EXTI->FTSR |= EXTI_FTSR_TR1; // Set interrupt EXTI* trigger to falling edge
+  EXTI->IMR |= EXTI_IMR_MR1;   // Unmask EXTI* line
+  NVIC_EnableIRQ(EXTI1_IRQn);
+
+  //NON INTERRUPT pin motor HOR (PB5)
+  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER3) | (0b00 << GPIO_MODER_MODER3_Pos); // set pin PA1 to input.
+  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR3) | (0b00 << GPIO_PUPDR_PUPDR3_Pos);
+}
+
 void startSystem(){
     //led pa5
     GPIOA->ODR |= GPIO_ODR_7; 
-  TIM2->CCR1 = 1720;
-  TIM3->CCR1 = 1280; 
+  TIM2->CCR1 = FULLSPEEDF;
+  TIM3->CCR1 = FULLSPEEDB; 
 }
 void stopSystem(){
-  TIM2->CCR1 = 1500;
-  TIM3->CCR1 = 1500; 
+  TIM2->CCR1 = STOPMOTOR;
+  TIM3->CCR1 = STOPMOTOR; 
   GPIOA->ODR &= ~GPIO_ODR_7;
 }
-//input pa0 button
-  static char msgBuf[80];
-  bool isOn = false;
+static char msgBuf[80];
+bool isOn = false;
+
 extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
   EXTI->PR |= EXTI_PR_PR0;  
@@ -99,6 +116,28 @@ extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”�
     stopSystem();
   }
   isOn = !isOn;
+}
+
+int speedMotor1 = FULLSPEEDF;
+int speedMotor2 = FULLSPEEDB;
+extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
+{
+  EXTI->PR |= EXTI_PR_PR1;  
+  if ((GPIOB->IDR & GPIO_IDR_5) == 32)
+  {
+    // zet waardes omlaag
+    if(speedMotor1 > FULLSPEEDB){
+      speedMotor1--;
+    }
+
+    if(speedMotor2 < FULLSPEEDF){
+      speedMotor2++;
+    }
+  }
+  else
+  {
+    // zet waardes omhoog
+  }
 }
 /**
   * @brief  The application entry point.
@@ -121,6 +160,8 @@ int main(void)
   setupServos();
   setupLeds();
   setupControls();
+  setupEncoder();
+
   while (1)
   {
 
