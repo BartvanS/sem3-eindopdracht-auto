@@ -1,49 +1,9 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
 #include <string.h>
 #include <stdio.h>
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 
 /* Definitions for defaultTask */
@@ -68,16 +28,8 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void *argument);
 
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 void setupServos(){
-  //servo pin a0
+  //servo pin 13
   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
   TIM3->PSC = 71; // 100.000 clockspeed -> 1 step per 10 micro seconden
   TIM3->CCMR1 = TIM3->CCMR1 & ~TIM_CCMR1_CC1S;
@@ -91,8 +43,7 @@ void setupServos(){
   GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER6) | (0b10 << GPIO_MODER_MODER6_Pos);
   GPIOA->AFR[0] = (GPIOA->AFR[0] & ~GPIO_AFRL_AFRL6) | (0b0010 << GPIO_AFRL_AFRL6_Pos);
 
-
-
+  //servo pin 12
   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
   TIM2->PSC = 71;
   TIM2->CCMR1 = TIM2->CCMR1 & ~TIM_CCMR1_CC1S;
@@ -159,7 +110,6 @@ int main(void)
   HAL_Init();
 
   SystemClock_Config();
-
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
