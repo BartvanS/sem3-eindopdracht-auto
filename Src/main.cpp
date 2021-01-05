@@ -79,22 +79,22 @@ void setupControls(){
 }
 
 void setupEncoder(){
-  //INTERRUPT pin encoder HOR (PB4)
-  GPIOB->MODER = (GPIOB->MODER & ~GPIO_MODER_MODER4) | (0b00 << GPIO_MODER_MODER4_Pos); // set pin PA0 to input.
-  GPIOB->PUPDR = (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR4) | (0b00 << GPIO_PUPDR_PUPDR4_Pos);
-  SYSCFG->EXTICR[0] = (SYSCFG->EXTICR[0] & ~SYSCFG_EXTICR1_EXTI2) | (0b0000 << SYSCFG_EXTICR1_EXTI2_Pos);
+  //INTERRUPT pin encoder HOR (pa1)
+  GPIOB->MODER = (GPIOB->MODER & ~GPIO_MODER_MODER1) | (0b00 << GPIO_MODER_MODER1_Pos); // set pin PA1 to input.
+  GPIOB->PUPDR = (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR1) | (0b00 << GPIO_PUPDR_PUPDR1_Pos);
+  SYSCFG->EXTICR[0] = (SYSCFG->EXTICR[0] & ~SYSCFG_EXTICR1_EXTI1) | (0b0000 << SYSCFG_EXTICR1_EXTI1_Pos);
   EXTI->FTSR |= EXTI_FTSR_TR1; // Set interrupt EXTI* trigger to falling edge
   EXTI->IMR |= EXTI_IMR_MR1;   // Unmask EXTI* line
   NVIC_EnableIRQ(EXTI1_IRQn);
 
-  //NON INTERRUPT pin motor HOR (PB5)
-  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER3) | (0b00 << GPIO_MODER_MODER3_Pos); // set pin PA1 to input.
-  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR3) | (0b00 << GPIO_PUPDR_PUPDR3_Pos);
+  //NON INTERRUPT pin motor HOR (PB4)
+  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER4) | (0b00 << GPIO_MODER_MODER4_Pos); 
+  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR4) | (0b00 << GPIO_PUPDR_PUPDR4_Pos);
 }
 
 void startSystem(){
-    //led pa5
-    GPIOA->ODR |= GPIO_ODR_7; 
+  //led pa5
+  GPIOA->ODR |= GPIO_ODR_7; 
   TIM2->CCR1 = FULLSPEEDF;
   TIM3->CCR1 = FULLSPEEDB; 
 }
@@ -124,27 +124,37 @@ extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”�
 extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
   EXTI->PR |= EXTI_PR_PR1;  
-  if ((GPIOB->IDR & GPIO_IDR_5) == 32)
+  if ((GPIOB->IDR & GPIO_IDR_4) == 16)
   {
+  
     // zet snelheid van de motoren omhoog motor 1 > 1280 motor 2 < 1720
     if(speedMotor1 > FULLSPEEDB){
-      speedMotor1--;
+      speedMotor1 -= 10;
     }
 
     if(speedMotor2 < FULLSPEEDF){
-      speedMotor2++;
+      speedMotor2+= 10;
     }
+        sprintf(msgBuf, "speed after: %d \n", speedMotor1);
+        HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+
   }
   else
   {
+            sprintf(msgBuf, "came in else 😏: %d \n", speedMotor1);
+        HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
     // zet snelheid van de motoren omhoog motor 1 < 1720 motor 2 > 1280
     if(speedMotor1 < FULLSPEEDF){
-      speedMotor1++;
+      speedMotor1+= 10;
     }
 
     if(speedMotor2 > FULLSPEEDB){
-      speedMotor2--;
+      speedMotor2-= 10;
     }
+  }
+  if(isOn){
+  TIM2->CCR1 = speedMotor1;
+  TIM3->CCR1 = speedMotor2; 
   }
 }
 /**
@@ -172,10 +182,10 @@ int main(void)
 
   while (1)
   {
-    if(isOn){
-      TIM2->CCR1 = speedMotor1;
-      TIM3->CCR1 = speedMotor2; 
-    }
+    // if(isOn){
+    //   TIM2->CCR1 = speedMotor1;
+    //   TIM3->CCR1 = speedMotor2; 
+    // }
   }
 }
 
