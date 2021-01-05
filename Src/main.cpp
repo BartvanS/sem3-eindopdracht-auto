@@ -105,6 +105,8 @@ void stopSystem(){
 }
 static char msgBuf[80];
 bool isOn = false;
+int speedMotor1 = FULLSPEEDF;
+int speedMotor2 = FULLSPEEDB;
 
 extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
@@ -118,14 +120,13 @@ extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”�
   isOn = !isOn;
 }
 
-int speedMotor1 = FULLSPEEDF;
-int speedMotor2 = FULLSPEEDB;
+
 extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
   EXTI->PR |= EXTI_PR_PR1;  
   if ((GPIOB->IDR & GPIO_IDR_5) == 32)
   {
-    // zet waardes omlaag
+    // zet snelheid van de motoren omhoog motor 1 > 1280 motor 2 < 1720
     if(speedMotor1 > FULLSPEEDB){
       speedMotor1--;
     }
@@ -136,7 +137,14 @@ extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”�
   }
   else
   {
-    // zet waardes omhoog
+    // zet snelheid van de motoren omhoog motor 1 < 1720 motor 2 > 1280
+    if(speedMotor1 < FULLSPEEDF){
+      speedMotor1++;
+    }
+
+    if(speedMotor2 > FULLSPEEDB){
+      speedMotor2--;
+    }
   }
 }
 /**
@@ -164,7 +172,10 @@ int main(void)
 
   while (1)
   {
-
+    if(isOn){
+      TIM2->CCR1 = speedMotor1;
+      TIM3->CCR1 = speedMotor2; 
+    }
   }
 }
 
