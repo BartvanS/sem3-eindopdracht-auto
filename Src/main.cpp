@@ -21,6 +21,19 @@ const osThreadAttr_t defaultTask_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
     .tz_module = 0,
     .reserved = 0};
+
+//communication
+    osThreadId_t comTaskHandle;
+const osThreadAttr_t comTask_attributes = {
+    .name = "comTask",
+    .attr_bits = osThreadDetached,
+    .cb_mem = NULL,
+    .cb_size = 0,
+    .stack_mem = NULL,
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
+    .tz_module = 0,
+    .reserved = 0};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -30,6 +43,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void *argument);
+void StartComTask(void *argument);
 
 void setupServos(){
   //servo pin 13
@@ -108,9 +122,7 @@ bool isOn = false;
 int speedMotor1 = FULLSPEEDF;
 int speedMotor2 = FULLSPEEDB;
 
-extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
-{
-  EXTI->PR |= EXTI_PR_PR0;  
+void handleOnOff(){
   if (!isOn)
   {
     startSystem();
@@ -120,29 +132,28 @@ extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”�
   isOn = !isOn;
 }
 
+extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
+{
+  EXTI->PR |= EXTI_PR_PR0;  
+  handleOnOff();
+}
+
 
 extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
 {
   EXTI->PR |= EXTI_PR_PR1;  
   if ((GPIOB->IDR & GPIO_IDR_4) == 16)
   {
-  
     // zet snelheid van de motoren omhoog motor 1 > 1280 motor 2 < 1720
     if(speedMotor1 > FULLSPEEDB){
       speedMotor1 -= 10;
     }
-
     if(speedMotor2 < FULLSPEEDF){
       speedMotor2+= 10;
     }
-        sprintf(msgBuf, "speed after: %d \n", speedMotor1);
-        HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-
   }
   else
   {
-            sprintf(msgBuf, "came in else 😏: %d \n", speedMotor1);
-        HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
     // zet snelheid van de motoren omhoog motor 1 < 1720 motor 2 > 1280
     if(speedMotor1 < FULLSPEEDF){
       speedMotor1+= 10;
@@ -172,13 +183,22 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  sprintf(msgBuf, "%s", "Hello World!\r\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
 
-  setupServos();
+//
+    setupServos();
   setupLeds();
   setupControls();
   setupEncoder();
+//
+
+  sprintf(msgBuf, "%s", "Hello World!\r\n");
+  HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+
+  /* threads */
+  osKernelInitialize();
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  comTaskHandle = osThreadNew(StartComTask, NULL, &comTask_attributes);
+  osKernelStart();
 
   while (1)
   {
@@ -319,8 +339,28 @@ void StartDefaultTask(void *argument)
   {
     osDelay(1);
   }
-  /* USER CODE END 5 */
 }
+
+void StartComTask(void *argument){
+  for (;;)
+  {
+    char in[8] = {'\0'}; 
+    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
+    // HAL_UART_Transmit(&huart2, (uint8_t *)in, 8, 1); 
+    
+    if(strcmp(in, "aan") == 0){
+      startSystem();
+      isOn = true;
+      in[0] = '\0';
+    }else if(strcmp(in, "uit") == 0){
+      stopSystem();
+      isOn = false;
+      in[0] = '\0';
+    }
+    
+  }
+}
+
 
 /**
   * @brief  Period elapsed callback in non blocking mode
