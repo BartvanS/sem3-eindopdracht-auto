@@ -169,6 +169,7 @@ int main(void)
   setupLeds();
   setupControls();
   setupEncoder();
+  setupSensors();
 //
 
   sprintf(msgBuf, "%s", "Hello World!\r\n");
@@ -193,14 +194,18 @@ int main(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
+int sensorValues[5];
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for (;;)
   {
-    setupSensors();
-    readSensors();
+    
+    readSensors(sensorValues);
+    sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
+    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+
     // calculatePID();
     // setMotor();
     // setMotor();
