@@ -151,7 +151,42 @@ int main(void)
   }
 }
 
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used 
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for (;;)
+  {
+    osDelay(1);
+  }
+}
 
+void StartComTask(void *argument){
+  for (;;)
+  {
+    char in[8] = {'\0'}; 
+    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
+    // HAL_UART_Transmit(&huart2, (uint8_t *)in, 8, 1); 
+    
+    if(strcmp(in, "aan") == 0){
+      startSystem();
+      isOn = true;
+      in[0] = '\0';
+    }else if(strcmp(in, "uit") == 0){
+      stopSystem();
+      isOn = false;
+      in[0] = '\0';
+    }
+    
+  }
+}
 
 /**
   * @brief System Clock Configuration
@@ -266,42 +301,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for (;;)
-  {
-    osDelay(1);
-  }
-}
 
-void StartComTask(void *argument){
-  for (;;)
-  {
-    char in[8] = {'\0'}; 
-    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
-    // HAL_UART_Transmit(&huart2, (uint8_t *)in, 8, 1); 
-    
-    if(strcmp(in, "aan") == 0){
-      startSystem();
-      isOn = true;
-      in[0] = '\0';
-    }else if(strcmp(in, "uit") == 0){
-      stopSystem();
-      isOn = false;
-      in[0] = '\0';
-    }
-    
-  }
-}
 
 
 /**
