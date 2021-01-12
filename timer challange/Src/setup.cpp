@@ -3,7 +3,7 @@
 void setupServos(){
   //servo pin 13
   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-  TIM3->PSC = 71; // 100.000 clockspeed -> 1 step per 10 micro seconden
+  TIM3->PSC = 71; // 100.000 clockspeed -> 1 step per 1 micro seconden
   TIM3->CCMR1 = TIM3->CCMR1 & ~TIM_CCMR1_CC1S;
   TIM3->CCMR1 = (TIM3->CCMR1 & ~TIM_CCMR1_OC1M) | (0b0110<<TIM_CCMR1_OC1M_Pos);
   TIM3->ARR = 20000; // 2000 ipv 20.000 want we hebben stappen van 10 micro seconden.
@@ -59,4 +59,10 @@ void setupEncoder(){
   //NON INTERRUPT pin motor HOR (PB4)
   GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER4) | (0b00 << GPIO_MODER_MODER4_Pos); 
   GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR4) | (0b00 << GPIO_PUPDR_PUPDR4_Pos);
+}
+
+void setupSensors(){
+  //sensor 1
+  GPIOA->MODER |= (GPIOA->MODER & ~GPIO_MODER_MODER1) | (0b00 << GPIO_MODER_MODER1_Pos); // set pin PA1 to input.
+  GPIOA->PUPDR |= (GPIOA->PUPDR & ~GPIO_PUPDR_PUPDR1) | (0b00 << GPIO_PUPDR_PUPDR1_Pos);
 }
