@@ -72,7 +72,8 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
 # CPP sources
 CPP_SOURCES =  \
 Src/main.cpp \
-Src/setup.cpp
+Src/setup.cpp \
+Src/functions.cpp
 
 # ASM sources
 ASM_SOURCES =  \

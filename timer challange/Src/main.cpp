@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "setup.h"
+#include "functions.h"
 
 #define FULLSPEEDF 1720
 #define FULLSPEEDB 1280

@@ -1,3 +1,5 @@
+#include "functions.h"
+
 void readSensors(int values[5]){
     // a10
   if((GPIOA->IDR & GPIO_IDR_10) == 1024){
