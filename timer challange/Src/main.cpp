@@ -35,10 +35,48 @@ const osThreadAttr_t comTask_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
     .tz_module = 0,
     .reserved = 0};
-/* USER CODE BEGIN PV */
 
-/* USER CODE END PV */
+    // //sensors
+    // osThreadId_t sensorTaskHandle;
+    // const osThreadAttr_t sensorTask_attributes = {
+    //   .name = "sensorTask",
+    //   .attr_bits = osThreadDetached,
+    //   .cb_mem = NULL,
+    //   .cb_size = 0,
+    //   .stack_mem = NULL,
+    //   .stack_size = 128 * 4,
+    //   .priority = (osPriority_t)osPriorityNormal,
+    //   .tz_module = 0,
+    //   .reserved = 0
+    //   };
 
+    // //PID Controller
+    // osThreadId_t PIDTaskHandle;
+    // const osThreadAttr_t PIDTask_attributes = {
+    //   .name = "PIDTask",
+    //   .attr_bits = osThreadDetached,
+    //   .cb_mem = NULL,
+    //   .cb_size = 0,
+    //   .stack_mem = NULL,
+    //   .stack_size = 128 * 4,
+    //   .priority = (osPriority_t)osPriorityNormal,
+    //   .tz_module = 0,
+    //   .reserved = 0
+    //   };
+      
+    // //Motor Controller
+    // osThreadId_t motorTaskHandle;
+    // const osThreadAttr_t motorTask_attributes = {
+    //   .name = "motorTask",
+    //   .attr_bits = osThreadDetached,
+    //   .cb_mem = NULL,
+    //   .cb_size = 0,
+    //   .stack_mem = NULL,
+    //   .stack_size = 128 * 4,
+    //   .priority = (osPriority_t)osPriorityNormal,
+    //   .tz_module = 0,
+    //   .reserved = 0
+    //   };
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -144,13 +182,12 @@ int main(void)
 
   while (1)
   {
-    // if(isOn){
-    //   TIM2->CCR1 = speedMotor1;
-    //   TIM3->CCR1 = speedMotor2; 
-    // }
+
   }
 }
-
+void readSensors(){
+  
+}
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
   * @brief  Function implementing the defaultTask thread.
@@ -164,7 +201,10 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    osDelay(1);
+    readSensors();
+    // calculatePID();
+    // setMotor();
+    // setMotor();
   }
 }
 
