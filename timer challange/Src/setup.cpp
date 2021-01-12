@@ -62,7 +62,19 @@ void setupEncoder(){
 }
 
 void setupSensors(){
-  //sensor 1
-  GPIOA->MODER |= (GPIOA->MODER & ~GPIO_MODER_MODER1) | (0b00 << GPIO_MODER_MODER1_Pos); // set pin PA1 to input.
-  GPIOA->PUPDR |= (GPIOA->PUPDR & ~GPIO_PUPDR_PUPDR1) | (0b00 << GPIO_PUPDR_PUPDR1_Pos);
+  //sensor pa10 / d2
+  GPIOA->MODER |= (GPIOA->MODER & ~GPIO_MODER_MODER10) | (0b00 << GPIO_MODER_MODER10_Pos); // set pin PA1 to input.
+  GPIOA->PUPDR |= (GPIOA->PUPDR & ~GPIO_PUPDR_PUPDR10) | (0b00 << GPIO_PUPDR_PUPDR10_Pos);
+  //sensor pb3 / d3
+  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER3) | (0b00 << GPIO_MODER_MODER3_Pos); // set pin PA1 to input.
+  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR3) | (0b00 << GPIO_PUPDR_PUPDR3_Pos);
+//sensor pb5 / d4
+  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER5) | (0b00 << GPIO_MODER_MODER5_Pos); // set pin PA1 to input.
+  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR5) | (0b00 << GPIO_PUPDR_PUPDR5_Pos);
+  //sensor pb10
+  GPIOB->MODER |= (GPIOB->MODER & ~GPIO_MODER_MODER10) | (0b00 << GPIO_MODER_MODER10_Pos); // set pin PA1 to input.
+  GPIOB->PUPDR |= (GPIOB->PUPDR & ~GPIO_PUPDR_PUPDR10) | (0b00 << GPIO_PUPDR_PUPDR10_Pos);
+  //sensor pa8 / d7
+  GPIOA->MODER |= (GPIOA->MODER & ~GPIO_MODER_MODER8) | (0b00 << GPIO_MODER_MODER8_Pos); // set pin PA1 to input.
+  GPIOA->PUPDR |= (GPIOA->PUPDR & ~GPIO_PUPDR_PUPDR8) | (0b00 << GPIO_PUPDR_PUPDR8_Pos);
 }

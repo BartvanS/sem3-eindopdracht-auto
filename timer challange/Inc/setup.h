@@ -10,5 +10,6 @@ void setupServos();
 void setupLeds();
 void setupControls();
 void setupEncoder();
+void setupSensors();
 
 #endif

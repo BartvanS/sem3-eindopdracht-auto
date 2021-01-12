@@ -185,9 +185,7 @@ int main(void)
 
   }
 }
-void readSensors(){
-  
-}
+
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
   * @brief  Function implementing the defaultTask thread.
@@ -201,6 +199,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
+    setupSensors();
     readSensors();
     // calculatePID();
     // setMotor();
