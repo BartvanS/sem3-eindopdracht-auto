@@ -34,6 +34,7 @@ const osThreadAttr_t comTask_attributes = {
     .stack_mem = NULL,
     .stack_size = 128 * 4,
     .priority = (osPriority_t)osPriorityNormal,
+    // .priority = (osPriority_t)osPriorityLow7,
     .tz_module = 0,
     .reserved = 0};
 
@@ -194,54 +195,44 @@ int main(void)
   }
 }
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-
-
 void StartDefaultTask(void *argument)
 {
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
+  sprintf(msgBuf, "Running default task\n\r");
+  addToQueue(&queue, msgBuf);
   for (;;)
   {
+    osDelay(10);
     
     readSensors(sensorValues);
-
-    sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
-    addToQueue(&queue, msgBuf);
-    osDelay(10);
+    // sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
     // HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-  // osDelay(1000);
     // calculatePID();
     // setMotor();
     // setMotor();
   }
 }
-
+char prevMsg[50] = {'\0'};
 void StartComTask(void *argument){
   for (;;)
   {
-    char* message = retrieveFromQueue(&queue);
-      sprintf(msgBuf, message);
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
     osDelay(10);
-    // char in[8] = {'\0'}; 
-    // HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
-    
-    // if(strcmp(in, "on") == 0){
-    //   startSystem();
-    //   isOn = true;
-    //   in[0] = '\0';
-    // }else if(strcmp(in, "off") == 0){
-    //   stopSystem();
-    //   isOn = false;
-    //   in[0] = '\0';
-    // }
+    char* message = retrieveFromQueue(&queue);
+    if(strcmp(message, "e:e\r\n") != 0 && strcmp(message, prevMsg) != 0){
+      sprintf(msgBuf, "%s", message);
+      HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+      strcpy(prevMsg, message);
+    }
+    char in[8] = {'\0'}; 
+    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 100); 
+    if(strcmp(in, "1") == 0){
+      startSystem();
+      isOn = true;
+      in[0] = '\0';
+    }else if(strcmp(in, "0") == 0){
+      stopSystem();
+      isOn = false;
+      in[0] = '\0';
+    }
     
   }
 }

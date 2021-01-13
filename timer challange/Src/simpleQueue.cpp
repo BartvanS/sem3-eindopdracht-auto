@@ -43,7 +43,8 @@ void addToQueue(SimpleQueue** queue, char* value){
 
 char* retrieveFromQueue(SimpleQueue** queue){
     if(*queue == NULL){
-        return (char*)"error:empty";
+        //error:empty ingekort voor efficientie
+        return (char*)"e:e\r\n";
     }
     SimpleQueue* next_item = (*queue)->nextSQ;
     char* tmpVal = (*queue)->value;
