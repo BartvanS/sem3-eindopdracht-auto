@@ -206,7 +206,7 @@ void StartDefaultTask(void *argument)
     readSensors(sensorValues);
     // sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
     // HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-    // calculatePID();
+    calculatePID(calcError(sensorValues));
     // setMotor();
     // setMotor();
   }
