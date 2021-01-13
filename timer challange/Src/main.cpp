@@ -205,13 +205,13 @@ int main(void)
 
 void StartDefaultTask(void *argument)
 {
-//   sprintf(msgBuf, "test \n");
-//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+  sprintf(msgBuf, "test \n");
+    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
       
 
   addToQueue(&queue, (char*)"test");
-// sprintf(msgBuf, "test \n");
-//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+sprintf(msgBuf, "test \n");
+    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
 
 //     sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
 //     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
