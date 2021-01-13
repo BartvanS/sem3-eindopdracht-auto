@@ -149,10 +149,7 @@ extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”�
   TIM3->CCR1 = speedMotor2; 
   }
 }
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
+
 SimpleQueue* queue;
 int sensorValues[] = {0,0,0,0,0};
 
@@ -204,8 +201,6 @@ void StartDefaultTask(void *argument)
     osDelay(10);
     
     readSensors(sensorValues);
-    // sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
-    // HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
     calculatePID(calcError(sensorValues));
     // setMotor();
     // setMotor();
