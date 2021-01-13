@@ -84,7 +84,6 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void *argument);
 void StartComTask(void *argument);
-void setupQueue();
 
 
 void startSystem(){
@@ -153,7 +152,13 @@ extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”�
   * @brief  The application entry point.
   * @retval int
   */
+SimpleQueue* queue;
+int sensorValues[] = {0,0,0,0,0};
 
+
+void setupQueue(){
+  queue = NULL;
+}
 int main(void)
 {
   HAL_Init();
@@ -180,7 +185,7 @@ int main(void)
   /* threads */
   osKernelInitialize();
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  // comTaskHandle = osThreadNew(StartComTask, NULL, &comTask_attributes);
+  comTaskHandle = osThreadNew(StartComTask, NULL, &comTask_attributes);
   osKernelStart();
 
   while (1)
@@ -196,37 +201,30 @@ int main(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-int sensorValues[] = {0,0,0,0,0};
-SimpleQueue* queue;
 
-
-void setupQueue(){
-queue->value = NULL;
-queue->nextSQ = NULL;
-}
 
 void StartDefaultTask(void *argument)
 {
-  sprintf(msgBuf, "test \n");
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+//   sprintf(msgBuf, "test \n");
+//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
       
 
   addToQueue(&queue, (char*)"test");
-sprintf(msgBuf, "test \n");
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+// sprintf(msgBuf, "test \n");
+//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
 
-    sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-       sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+//     sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
+//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+//        sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
+//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for (;;)
   {
     
     readSensors(sensorValues);
-  //   sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
-  //   HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+    sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
+    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
   // osDelay(1000);
     // calculatePID();
     // setMotor();
@@ -239,7 +237,6 @@ void StartComTask(void *argument){
   {
     char in[8] = {'\0'}; 
     HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
-    // HAL_UART_Transmit(&huart2, (uint8_t *)in, 8, 1); 
     
     if(strcmp(in, "on") == 0){
       startSystem();
