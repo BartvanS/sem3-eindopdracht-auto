@@ -42,14 +42,12 @@ void addToQueue(SimpleQueue** queue, char* value){
 }
 
 char* retrieveFromQueue(SimpleQueue** queue){
-     SimpleQueue* local = (*queue);
-    if(local == NULL){
-        return (char*)"faal";
+    if(*queue == NULL){
+        return (char*)"error:empty";
     }
-    SimpleQueue* next_item = local->nextSQ;
-    char* tmpVal = local->value;
-    free(local);
-    local = NULL;
-    local = next_item;
-    return (char*)"faal";
+    SimpleQueue* next_item = (*queue)->nextSQ;
+    char* tmpVal = (*queue)->value;
+    free(*queue);
+    *queue = next_item;
+    return tmpVal;
 }

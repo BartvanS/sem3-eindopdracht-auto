@@ -205,26 +205,17 @@ int main(void)
 
 void StartDefaultTask(void *argument)
 {
-  sprintf(msgBuf, "test \n");
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-      
-
-  addToQueue(&queue, (char*)"test");
-sprintf(msgBuf, "test \n");
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-
-//     sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
-//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
-//        sprintf(msgBuf, "value: %s \n", retrieveFromQueue(&queue));
-//     HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for (;;)
   {
     
     readSensors(sensorValues);
+
     sprintf(msgBuf, "Yooo: %d %d %d %d %d\r\n", sensorValues[0], sensorValues[1],sensorValues[2],sensorValues[3],sensorValues[4]);
-    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+    addToQueue(&queue, msgBuf);
+    osDelay(10);
+    // HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
   // osDelay(1000);
     // calculatePID();
     // setMotor();
@@ -235,18 +226,22 @@ sprintf(msgBuf, "test \n");
 void StartComTask(void *argument){
   for (;;)
   {
-    char in[8] = {'\0'}; 
-    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
+    char* message = retrieveFromQueue(&queue);
+      sprintf(msgBuf, message);
+    HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+    osDelay(10);
+    // char in[8] = {'\0'}; 
+    // HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1000); 
     
-    if(strcmp(in, "on") == 0){
-      startSystem();
-      isOn = true;
-      in[0] = '\0';
-    }else if(strcmp(in, "off") == 0){
-      stopSystem();
-      isOn = false;
-      in[0] = '\0';
-    }
+    // if(strcmp(in, "on") == 0){
+    //   startSystem();
+    //   isOn = true;
+    //   in[0] = '\0';
+    // }else if(strcmp(in, "off") == 0){
+    //   stopSystem();
+    //   isOn = false;
+    //   in[0] = '\0';
+    // }
     
   }
 }
