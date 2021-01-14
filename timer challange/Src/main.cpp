@@ -176,9 +176,7 @@ int main(void)
   setupSensors();
   setupQueue();
 //
-
-  sprintf(msgBuf, "%s", "Hello World!\r\n");
-  HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
+  addToQueue(&queue, (char*)"Hello world\n\r");
 
   /* threads */
   osKernelInitialize();
@@ -194,8 +192,7 @@ int main(void)
 
 void StartDefaultTask(void *argument)
 {
-  sprintf(msgBuf, "Running default task\n\r");
-  addToQueue(&queue, msgBuf);
+  addToQueue(&queue, (char*)"Starting default task!\n\r");
   for (;;)
   {
     osDelay(10);
@@ -212,7 +209,7 @@ void StartComTask(void *argument){
   {
     osDelay(10);
     char* message = retrieveFromQueue(&queue);
-    if(strcmp(message, "e:e\r\n") != 0 && strcmp(message, prevMsg) != 0){
+    if(strcmp(message, "e:e") != 0){
       sprintf(msgBuf, "%s", message);
       HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
       strcpy(prevMsg, message);
