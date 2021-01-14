@@ -86,20 +86,22 @@ static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void *argument);
 void StartComTask(void *argument);
 
+bool isOn = false;
 
 void startSystem(){
   //led pa5
+  isOn = true;
   GPIOA->ODR |= GPIO_ODR_7; 
   TIM2->CCR1 = FULLSPEEDF;
   TIM3->CCR1 = FULLSPEEDB; 
 }
 void stopSystem(){
+  isOn = false;
   TIM2->CCR1 = STOPMOTOR;
   TIM3->CCR1 = STOPMOTOR; 
   GPIOA->ODR &= ~GPIO_ODR_7;
 }
 static char msgBuf[80];
-bool isOn = false;
 int speedMotor1 = FULLSPEEDF;
 int speedMotor2 = FULLSPEEDB;
 
@@ -150,12 +152,15 @@ extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”�
   }
 }
 
-SimpleQueue* queue;
+SimpleQueue* comQueue;
+SimpleQueue* mainQueue;
+
 int sensorValues[] = {0,0,0,0,0};
 
 
 void setupQueue(){
-  queue = NULL;
+  comQueue = NULL;
+  mainQueue = NULL;
 }
 int main(void)
 {
@@ -176,7 +181,7 @@ int main(void)
   setupSensors();
   setupQueue();
 //
-  addToQueue(&queue, (char*)"Hello world\n\r");
+  addToQueue(&comQueue, (char*)"Hello world\n\r");
 
   /* threads */
   osKernelInitialize();
@@ -192,19 +197,26 @@ int main(void)
 
 void StartDefaultTask(void *argument)
 {
-  addToQueue(&queue, (char*)"Starting default task!\n\r");
+  addToQueue(&comQueue, (char*)"Starting default task!\n\r");
   for (;;)
   {
     osDelay(10);
-    
+    char* message = retrieveFromQueue(&comQueue);
+    if(strcmp(message, "start") == 0){
+      startSystem();
+    }else if(strcmp(message, "stop") == 0){
+      stopSystem();
+    }else{
+      //reee
+    }
     readSensors(sensorValues);
     int PIDvalue = calculatePID(calcError(sensorValues));
     int motor1 = FULLSPEEDF - PIDvalue;
     int motor2 = FULLSPEEDB + PIDvalue;
     if (isOn)
     {
-          TIM2->CCR1 = motor1;
-    TIM3->CCR1 = motor2;
+      TIM2->CCR1 = motor1;
+      TIM3->CCR1 = motor2;
     }
     
 
@@ -215,7 +227,7 @@ void StartComTask(void *argument){
   for (;;)
   {
     osDelay(10);
-    char* message = retrieveFromQueue(&queue);
+    char* message = retrieveFromQueue(&comQueue);
     if(strcmp(message, "e:e") != 0){
       sprintf(msgBuf, "%s", message);
       HAL_UART_Transmit(&huart2, (uint8_t *)msgBuf, strlen(msgBuf), HAL_MAX_DELAY);
@@ -224,14 +236,11 @@ void StartComTask(void *argument){
     char in[8] = {'\0'}; 
     HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 100); 
     if(strcmp(in, "1") == 0){
-      startSystem();
-      isOn = true;
-      in[0] = '\0';
+      addToQueue(&mainQueue, (char*)"start");
     }else if(strcmp(in, "0") == 0){
-      stopSystem();
-      isOn = false;
-      in[0] = '\0';
+      addToQueue(&mainQueue, (char*)"stop");
     }
+      in[0] = '\0';
     
   }
 }
