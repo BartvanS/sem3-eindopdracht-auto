@@ -56,6 +56,7 @@ int calcError(int values[5]){
 
     return error;
 }
+
 int P = 0;
 int I = 0;
 int D = 0;
@@ -64,5 +65,6 @@ int calculatePID(int error){
     P = error;
     I = I + error;
     D = error - previousError;
-    return -1;
+    previousError = error;
+    return (Kp*P) + (Ki*I) + (Kd*D);
 }

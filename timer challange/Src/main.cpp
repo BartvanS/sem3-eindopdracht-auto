@@ -5,8 +5,8 @@
 #include "setup.h"
 #include "functions.h"
 #include "simpleQueue.h"
-#define FULLSPEEDF 1720
-#define FULLSPEEDB 1280
+#define FULLSPEEDF 1620
+#define FULLSPEEDB 1380
 #define STOPMOTOR 1500
 
 UART_HandleTypeDef huart2;
@@ -198,9 +198,16 @@ void StartDefaultTask(void *argument)
     osDelay(10);
     
     readSensors(sensorValues);
-    calculatePID(calcError(sensorValues));
-    // setMotor();
-    // setMotor();
+    int PIDvalue = calculatePID(calcError(sensorValues));
+    int motor1 = FULLSPEEDF - PIDvalue;
+    int motor2 = FULLSPEEDB + PIDvalue;
+    if (isOn)
+    {
+          TIM2->CCR1 = motor1;
+    TIM3->CCR1 = motor2;
+    }
+    
+
   }
 }
 char prevMsg[50] = {'\0'};
