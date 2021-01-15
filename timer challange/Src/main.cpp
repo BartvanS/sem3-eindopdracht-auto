@@ -33,8 +33,8 @@ const osThreadAttr_t comTask_attributes = {
     .cb_size = 0,
     .stack_mem = NULL,
     .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
-    // .priority = (osPriority_t)osPriorityLow7,
+    // .priority = (osPriority_t)osPriorityNormal,
+    .priority = (osPriority_t)osPriorityBelowNormal,
     .tz_module = 0,
     .reserved = 0};
 
@@ -232,7 +232,7 @@ void StartComTask(void *argument){
       strcpy(prevMsg, message);
     }
     char in[8] = {'\0'}; 
-    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 100); 
+    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1); 
     if(strcmp(in, "1") == 0){
       addToQueue(&mainQueue, (char*)"aan");
     }else if(strcmp(in, "0") == 0){
