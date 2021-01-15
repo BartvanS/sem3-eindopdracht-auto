@@ -33,8 +33,8 @@ const osThreadAttr_t comTask_attributes = {
     .cb_size = 0,
     .stack_mem = NULL,
     .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
-    // .priority = (osPriority_t)osPriorityLow7,
+    // .priority = (osPriority_t)osPriorityNormal,
+    .priority = (osPriority_t)osPriorityBelowNormal,
     .tz_module = 0,
     .reserved = 0};
 
@@ -112,7 +112,6 @@ void handleOnOff(){
   }else{
     stopSystem();
   }
-  isOn = !isOn;
 }
 
 extern "C" void EXTI0_IRQHandler(void)  // Do not forget the ‘extern “C”’ in case of C++
@@ -154,7 +153,6 @@ extern "C" void EXTI1_IRQHandler(void)  // Do not forget the ‘extern “C”�
 
 SimpleQueue* comQueue;
 SimpleQueue* mainQueue;
-
 int sensorValues[] = {0,0,0,0,0};
 
 
@@ -174,7 +172,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 //
-    setupServos();
+  setupServos();
   setupLeds();
   setupControls();
   setupEncoder();
@@ -201,14 +199,14 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     osDelay(10);
-    char* message = retrieveFromQueue(&comQueue);
-    if(strcmp(message, "start") == 0){
+    char* message = retrieveFromQueue(&mainQueue);
+    if(strcmp(message, "aan") == 0){
       startSystem();
-    }else if(strcmp(message, "stop") == 0){
+    }else if (strcmp(message, "uit") == 0)
+    {
       stopSystem();
-    }else{
-      //reee
     }
+    
     readSensors(sensorValues);
     int PIDvalue = calculatePID(calcError(sensorValues));
     int motor1 = FULLSPEEDF - PIDvalue;
@@ -234,11 +232,11 @@ void StartComTask(void *argument){
       strcpy(prevMsg, message);
     }
     char in[8] = {'\0'}; 
-    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 100); 
+    HAL_UART_Receive(&huart2, (uint8_t *)in, 8, 1); 
     if(strcmp(in, "1") == 0){
-      addToQueue(&mainQueue, (char*)"start");
+      addToQueue(&mainQueue, (char*)"aan");
     }else if(strcmp(in, "0") == 0){
-      addToQueue(&mainQueue, (char*)"stop");
+      addToQueue(&mainQueue, (char*)"uit");
     }
       in[0] = '\0';
     
