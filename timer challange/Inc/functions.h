@@ -2,9 +2,9 @@
 #define FUNCTIONS_H
 #define sensorCount 5
 
-#define Kp 10
+#define Kp 20
 #define Ki 0
-#define Kd 1
+#define Kd 10
 
 #include "main.h"
 #include "cmsis_os.h"
