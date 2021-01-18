@@ -210,14 +210,14 @@ void StartDefaultTask(void *argument)
     readSensors(sensorValues);
     int PIDvalue = calculatePID(calcError(sensorValues));
     int motor1 = FULLSPEEDF - PIDvalue;
-    int motor2 = FULLSPEEDB + PIDvalue;
+    int motor2 = FULLSPEEDB - PIDvalue;
+	// 1500 + 120 - PIDvalue;
+	// 1500 - 120 - PIDvalue;
     if (isOn)
     {
       TIM2->CCR1 = motor1;
       TIM3->CCR1 = motor2;
     }
-    
-
   }
 }
 char prevMsg[50] = {'\0'};
