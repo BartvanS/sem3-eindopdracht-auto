@@ -4,7 +4,7 @@
 
 #define Kp 30
 #define Ki 0
-#define Kd 0
+#define Kd 1
 
 #include "main.h"
 #include "cmsis_os.h"

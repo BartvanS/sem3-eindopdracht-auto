@@ -195,6 +195,7 @@ int main(void)
 
 void StartDefaultTask(void *argument)
 {
+  osDelay(10);
   addToQueue(&comQueue, (char*)"Starting default task!\n\r");
   for (;;)
   {
@@ -209,10 +210,8 @@ void StartDefaultTask(void *argument)
     
     readSensors(sensorValues);
     int PIDvalue = calculatePID(calcError(sensorValues));
-    int motor1 = FULLSPEEDF - PIDvalue;
-    int motor2 = FULLSPEEDB - PIDvalue;
-	// 1500 + 120 - PIDvalue;
-	// 1500 - 120 - PIDvalue;
+    int motor1 = FULLSPEEDF + PIDvalue;
+    int motor2 = FULLSPEEDB + PIDvalue;
     if (isOn)
     {
       TIM2->CCR1 = motor1;
